@@ -6,14 +6,14 @@ char[] char2;
 String[] urls = {"variola_virus.fasta"};
 //String[] urls = {"Mumps virus strain MuV-IA.fasta", "ebola_zaire.fasta", "dengue virus 1 isolate 00099-S.fasta", "variola_virus.fasta"}; //249 million for human chromosome
 String[] names = {"Mumps", "Ebola", "Dengue", "Variola Major", "Human Chromosome I"};
-float step = 0.01;
+float step = 0.4;
 float r, g, b;
 Parser parser;
 Background bg;
 int textY = 15;
 
 void setup() {
-  size(800, 800);
+  size(1200, 800);
   background(230);
   //colorMode(HSB, 360, 100, 100);
   parser = new Parser();
@@ -24,12 +24,12 @@ void setup() {
 
 
   for (int i = 0; i < urls.length; i++) {
-    color id = color(50*i, 300, 100);
+    color id = color(60*i, 300, 80);
     stroke(id);
 
     characters = parser.parseFasta(urls[i]);
-    shape(parser.createWalker(step, characters), width/2, height);
-    //parser.renderSymbols(step, characters);
+    //shape(parser.createWalker(step, characters), width/2, height/2);
+    parser.renderSymbols(step, characters);
 
     fill(id);
     text(urls[i], 10, textY);

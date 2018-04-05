@@ -39,10 +39,10 @@ class Parser {
       //x = 0;
       //y = 0;
       switch(nucleotides[i]) {
-      case 'A':
+      case 'C':
         y -= step;
         break;
-      case 'C':
+      case 'A':
         x += step;
         break;
       case 'G':
@@ -70,30 +70,25 @@ class Parser {
     y = height - 20;
     fill(0, 1);
     for (int i = 0; i < nucleotides.length; i++) {
-      x = width/2;
-      y = height/2;
-      float t = radians(i);
-      float x2 = x + t * cos(t); //play with t
-      float y2 = y + t * sin(t);
       switch(nucleotides[i]) {
-      case 'A':
+      case 'C':
         y = y - step;
         break;
-      case 'C':
+      case 'A':
         x = x + step;
         noStroke();
-        fill(255, 0, 0, 100);
-        ellipse(x2, y2, 1, 1);
+        //fill(255, 0, 0, 100);
+        //ellipse(x, y, 1, 1);
         break;
       case 'G':
         y = y + step;
-        //stroke(0, 0, 255, 80);
-        //line(x2-1, y2, x2+1, y2);
-        rect(x2, y2, 5, 5);
+        stroke(255, 0, 0, 5);
+        line(x-3, y, x+3, y);
+        //rect(x2, y2, 5, 5);
         break;
       case 'T':
         x = x - step;
-        stroke(0, 0, 255, 50);
+        stroke(0, 0, 255, 5);
         line(x, y-5, x, y+5);
         break;
       }
