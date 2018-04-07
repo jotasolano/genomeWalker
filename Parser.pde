@@ -7,6 +7,7 @@ class Parser {
   char[] characters;
   char[] foo;
   PShape w; //w as in walker
+  PShape lineParent, lineA;
   PGraphics pg = createGraphics(width, height);
   float x;
   float y;
@@ -29,70 +30,115 @@ class Parser {
   // take array of characters and create vertices
   // positioned according to the letters
   PShape createWalker(float step, char[] nucleotides) {
+
+    PShape[] lines = new PShape[nucleotides.length];
+    
+    float minX, maxX, minY, maxY, halfX, halfY;
+
+    // Create the shape group
+    lineParent = createShape(GROUP);
+
+    // Create the walker shape
+    w = createShape();
+
+    minX = width;
+    minY = height;
+    maxX = 0;
+    maxY = 0;
+    halfX = 0;
+    halfY = 0;
     x = 0;
     y = 0;
-    w = createShape();
+
+    //float mapStrokeCol = map();
+
     w.beginShape();
     pushStyle();
     w.noFill();
     for (int i = 0; i < nucleotides.length; i++) {
-      //x = 0;
-      //y = 0;
       switch(nucleotides[i]) {
-      case 'C':
-        y -= step;
-        break;
       case 'A':
-        x += step;
+        x += step; // right
+        lineA = createShape(LINE, x, y, x-20, y-20);
+        lineA.setStroke(color(#FFCC00, 10+i));
+
+        lines[i] = createShape(LINE, x, y, x-20, y-20);
+        lines[i].setStroke(color(#FFCC00, 10+i));
+        //lineA.setStrokeWeight(0.5);
+        break;
+      case 'C':
+        y -= step; // up
         break;
       case 'G':
-        y += step;
+        y += step; // down
         break;
       case 'T':
-        x -= step;
+        x -= step; // left
         break;
       }
-      float t = radians(i);
-      float x2 = x + t * cos(t); //play with t
-      float y2 = y + t * sin(t);
+      if (x < minX) {
+        minX = x;
+      } else if (y < minY) {
+        minY = y;
+      } else if (x > maxX) {
+        maxX = x;
+      } else if (y > maxY) {
+        maxY = y;
+      }
+
+      // Calculate half of the bounding box
+      halfX = (abs(maxX) - abs(minX)) / 2;
+      halfY = (abs(maxY) - abs(minY)) / 2;
+
+
+      lineParent.addChild(lines[i]);
+
+      // Draw the walker
       w.vertex(x, y);
     }
+
+    // Position shape in center of the screen
+    w.translate(width/2 - halfX, height/2 - halfY);
     w.endShape();
+    lineParent.translate(width/2 - halfX, height/2 - halfY);
     popStyle();
 
-    return w;
+    return lineParent;
   }
 
+
+
   void renderSymbols(float step, char[] nucleotides) {
-    colorMode(RGB);
     rectMode(CENTER);
-    x = 2*width/3;
-    y = height - 20;
-    fill(0, 1);
+    x = 200;
+    y = height/2;
+    noFill();
+    pushStyle();
     for (int i = 0; i < nucleotides.length; i++) {
       switch(nucleotides[i]) {
-      case 'C':
-        y = y - step;
-        break;
       case 'A':
         x = x + step;
-        noStroke();
-        //fill(255, 0, 0, 100);
-        //ellipse(x, y, 1, 1);
+        stroke(102, 194, 165, 5);
+        line(0, 0, x-3, y-3);
+        break;
+      case 'C':
+        y = y - step;
+        stroke(252, 141, 98, 5);
+        line(width, 0, x+3, y-3);
         break;
       case 'G':
         y = y + step;
-        stroke(255, 0, 0, 5);
-        line(x-3, y, x+3, y);
-        //rect(x2, y2, 5, 5);
+        stroke(141, 160, 203, 5);
+        line(width, height, x+3, y+3);
         break;
       case 'T':
         x = x - step;
-        stroke(0, 0, 255, 5);
-        line(x, y-5, x, y+5);
+        stroke(231, 138, 195, 5);
+        line(0, height, x-3, y+3);
         break;
       }
     }
+    popStyle();
   }
 
   void renderTitle(String seqName) {
