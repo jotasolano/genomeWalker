@@ -1,9 +1,9 @@
 import processing.core.PApplet;
 import processing.pdf.*;
 
-char[] characters;
+String characters;
 char[] char2;
-String[] urls = {"Mumps virus strain MuV-IA.fasta"};
+String[] urls = {"dengue virus 1 isolate 00099-S.fasta"};
 //String[] urls = {"Mumps virus strain MuV-IA.fasta", "ebola_zaire.fasta", "dengue virus 1 isolate 00099-S.fasta", "variola_virus.fasta"}; //249 million for human chromosome
 String[] names = {"Mumps", "Ebola", "Dengue", "Variola Major", "Human Chromosome I"};
 float step = 0.4;
@@ -28,11 +28,13 @@ void setup() {
 
     characters = parser.parseFasta(urls[i]);
     shape(parser.createWalker(step, characters), 0, 0);
+    
     //parser.renderSymbols(step, characters);
 
     fill(id);
     text(urls[i], 10, textY);
     textY += 20;
+    
     //parser.renderTitle(names[0]);
   }
   //endRecord();

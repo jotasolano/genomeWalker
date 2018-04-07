@@ -3,44 +3,33 @@ class Parser {
   String fastaUrl;
   String[] fasta;
   String parsedFasta;
-  char[] test = {'A', 'C', 'G', 'T'};
   char[] characters;
-  char[] foo;
   PShape w; //w as in walker
-  PShape lineParent, lineA;
+  PShape lineParent;
   PGraphics pg = createGraphics(width, height);
   float x;
   float y;
   PFont font;
   int fontSize = 26;
+  int a = 20;
 
   float[] positions;
 
-  // load the fasta file
-  // parse to only get nucleotides
-  // return array of characters
-  char[] parseFasta(String fastaUrl) {
+  // load the fasta file, parse to only get nucleotides, return a String
+  String parseFasta(String fastaUrl) {
     this.fastaUrl = fastaUrl;
-    this.fasta = loadStrings(fastaUrl);
-    this.parsedFasta = join(subset(fasta, 1), "");
-    println(fastaUrl, parsedFasta.toCharArray().length);
-    return this.characters = parsedFasta.toCharArray();
+    fasta = loadStrings(fastaUrl);
+    parsedFasta = join(subset(fasta, 1), "");
+    return parsedFasta;
   }
 
-  // take array of characters and create vertices
-  // positioned according to the letters
-  PShape createWalker(float step, char[] nucleotides) {
+  // draw a "walker" by moving the x and y points based on the characters of the sequence
+  PShape createWalker(float step, String nucleotides) {
+    char[] nucleotidesChar = nucleotides.toCharArray();
+    float mapA, mapC, mapG, mapT, minX, maxX, minY, maxY, halfX, halfY;
+    ArrayList<PShape> lines = new ArrayList<PShape>(nucleotides.length());
 
-    PShape[] lines = new PShape[nucleotides.length];
-    
-    float minX, maxX, minY, maxY, halfX, halfY;
-
-    // Create the shape group
-    lineParent = createShape(GROUP);
-
-    // Create the walker shape
-    w = createShape();
-
+    // initialize vars
     minX = width;
     minY = height;
     maxX = 0;
@@ -50,32 +39,57 @@ class Parser {
     x = 0;
     y = 0;
 
-    //float mapStrokeCol = map();
+    colorMode(HSB, 360, 100, 100, 100);
 
+    // Create the shape group
+    lineParent = createShape(GROUP);
+
+    // Create the walker shape
+    w = createShape();
     w.beginShape();
-    pushStyle();
+    w.strokeWeight(0.5);
     w.noFill();
-    for (int i = 0; i < nucleotides.length; i++) {
-      switch(nucleotides[i]) {
+    strokeWeight(30);
+    for (int i = 0; i < nucleotides.length(); i++) {
+      mapA = map(i, 0, nucleotides.length(), 0, 360/4);
+      mapC = map(i, 0, nucleotides.length(), 0, 2*(360/4));
+      mapG = map(i, 0, nucleotides.length(), 0, 3*(360/4));
+      mapT = map(i, 0, nucleotides.length(), 0, 360);
+
+      switch(nucleotidesChar[i]) {
       case 'A':
         x += step; // right
-        lineA = createShape(LINE, x, y, x-20, y-20);
-        lineA.setStroke(color(#FFCC00, 10+i));
-
-        lines[i] = createShape(LINE, x, y, x-20, y-20);
-        lines[i].setStroke(color(#FFCC00, 10+i));
-        //lineA.setStrokeWeight(0.5);
+        lines.add( createShape(LINE, x, y, x-3, y-3) );
+        lines.get(i).setStroke(color(mapA, 100, 100, a));
         break;
+
       case 'C':
         y -= step; // up
+        lines.add( createShape(LINE, x, y, x+3, y-3) );
+        lines.get(i).setStroke(color(mapC, 100, 100, a));
         break;
+
       case 'G':
         y += step; // down
+        lines.add( createShape(LINE, x, y, x+3, y+3) );
+        lines.get(i).setStroke(color(mapG, 100, 100, a));
         break;
+
       case 'T':
         x -= step; // left
+        lines.add( createShape(LINE, x, y, x-3, y+3) );
+        lines.get(i).setStroke(color(mapT, 100, 100, a));
         break;
+
+        // needed because I'm getting a weird outOfBounds error
+        // probably a more elegant way to do this
+        // i imagine there are some weird characters that make the index skip
+      default: 
+        lines.add( createShape(LINE, x, y, x, y) );
+        lines.get(i).setStroke(color(#FFCC00, 0));
       }
+
+      // Calculate bounding box
       if (x < minX) {
         minX = x;
       } else if (y < minY) {
@@ -86,60 +100,25 @@ class Parser {
         maxY = y;
       }
 
-      // Calculate half of the bounding box
       halfX = (abs(maxX) - abs(minX)) / 2;
       halfY = (abs(maxY) - abs(minY)) / 2;
 
-
-      lineParent.addChild(lines[i]);
-
-      // Draw the walker
+      // Create vertices for the line walker 
       w.vertex(x, y);
-    }
+
+      lineParent.addChild(lines.get(i));
+    } // loop nucleotides
+
+    w.endShape();
+    w.setStroke(color(0, 10));
+    lineParent.addChild(w);
 
     // Position shape in center of the screen
-    w.translate(width/2 - halfX, height/2 - halfY);
-    w.endShape();
     lineParent.translate(width/2 - halfX, height/2 - halfY);
-    popStyle();
 
     return lineParent;
   }
 
-
-
-  void renderSymbols(float step, char[] nucleotides) {
-    rectMode(CENTER);
-    x = 200;
-    y = height/2;
-    noFill();
-    pushStyle();
-    for (int i = 0; i < nucleotides.length; i++) {
-      switch(nucleotides[i]) {
-      case 'A':
-        x = x + step;
-        stroke(102, 194, 165, 5);
-        line(0, 0, x-3, y-3);
-        break;
-      case 'C':
-        y = y - step;
-        stroke(252, 141, 98, 5);
-        line(width, 0, x+3, y-3);
-        break;
-      case 'G':
-        y = y + step;
-        stroke(141, 160, 203, 5);
-        line(width, height, x+3, y+3);
-        break;
-      case 'T':
-        x = x - step;
-        stroke(231, 138, 195, 5);
-        line(0, height, x-3, y+3);
-        break;
-      }
-    }
-    popStyle();
-  }
 
   void renderTitle(String seqName) {
     font = createFont("PlayfairDisplay-Regular.ttf", fontSize);
