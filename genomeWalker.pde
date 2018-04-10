@@ -3,9 +3,9 @@ import processing.pdf.*;
 
 String characters;
 char[] char2;
-String[] urls = {"dengue virus 1 isolate 00099-S.fasta"};
-//String[] urls = {"Mumps virus strain MuV-IA.fasta", "ebola_zaire.fasta", "dengue virus 1 isolate 00099-S.fasta", "variola_virus.fasta"}; //249 million for human chromosome
-String[] names = {"Mumps", "Ebola", "Dengue", "Variola Major", "Human Chromosome I"};
+String[] urls = {"ebola_zaire.fasta"};
+//String[] urls = {"Mumps virus strain MuV-IA.fasta", "ebola_zaire.fasta", "dengue virus 1 isolate 00099-S.fasta", "variola_virus.fasta"};
+String[] names = {"Mumps", "Ebola", "Dengue", "Variola Major"};
 float step = 0.4;
 float r, g, b;
 Parser parser;
@@ -14,12 +14,12 @@ int textY = 15;
 
 void setup() {
   size(1200, 800);
-  background(230);
+  background(color(#323232));
   parser = new Parser();
   bg = new Background();
 
   //beginRecord(PDF, "filename.pdf");
-  bg.renderBackground();
+  //bg.renderBackground();
 
 
   for (int i = 0; i < urls.length; i++) {

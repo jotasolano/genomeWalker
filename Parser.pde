@@ -11,7 +11,7 @@ class Parser {
   float y;
   PFont font;
   int fontSize = 26;
-  int a = 20;
+  int a = 5;
 
   float[] positions;
 
@@ -26,7 +26,7 @@ class Parser {
   // draw a "walker" by moving the x and y points based on the characters of the sequence
   PShape createWalker(float step, String nucleotides) {
     char[] nucleotidesChar = nucleotides.toCharArray();
-    float mapA, mapC, mapG, mapT, minX, maxX, minY, maxY, halfX, halfY;
+    float mapA, mapC, mapG, mapT, mapStroke, minX, maxX, minY, maxY, halfX, halfY;
     ArrayList<PShape> lines = new ArrayList<PShape>(nucleotides.length());
 
     // initialize vars
@@ -38,8 +38,11 @@ class Parser {
     halfY = 0;
     x = 0;
     y = 0;
+    
+    float colors[] = {170, 280, 338, 205};
 
     colorMode(HSB, 360, 100, 100, 100);
+    //blendMode(ADD);
 
     // Create the shape group
     lineParent = createShape(GROUP);
@@ -51,34 +54,42 @@ class Parser {
     w.noFill();
     strokeWeight(30);
     for (int i = 0; i < nucleotides.length(); i++) {
-      mapA = map(i, 0, nucleotides.length(), 0, 360/4);
+      mapA = map(i, 0, nucleotides.length(), 170, 283);
       mapC = map(i, 0, nucleotides.length(), 0, 2*(360/4));
       mapG = map(i, 0, nucleotides.length(), 0, 3*(360/4));
       mapT = map(i, 0, nucleotides.length(), 0, 360);
+      
+      if (i < nucleotides.length()/2) {
+        mapStroke = map(i, 0, nucleotides.length()/2, 3, 30);
+      } else {
+        mapStroke = map(i, nucleotides.length()/2, nucleotides.length(), 30, 3);
+      }
+
+      strokeWeight(mapStroke);
 
       switch(nucleotidesChar[i]) {
       case 'A':
         x += step; // right
         lines.add( createShape(LINE, x, y, x-3, y-3) );
-        lines.get(i).setStroke(color(mapA, 100, 100, a));
+        lines.get(i).setStroke(color(colors[0], 100, 100, a));
         break;
 
       case 'C':
         y -= step; // up
         lines.add( createShape(LINE, x, y, x+3, y-3) );
-        lines.get(i).setStroke(color(mapC, 100, 100, a));
+        lines.get(i).setStroke(color(colors[1], 100, 100, a));
         break;
 
       case 'G':
         y += step; // down
         lines.add( createShape(LINE, x, y, x+3, y+3) );
-        lines.get(i).setStroke(color(mapG, 100, 100, a));
+        lines.get(i).setStroke(color(colors[2], 100, 100, a));
         break;
 
       case 'T':
         x -= step; // left
         lines.add( createShape(LINE, x, y, x-3, y+3) );
-        lines.get(i).setStroke(color(mapT, 100, 100, a));
+        lines.get(i).setStroke(color(colors[3], 100, 100, a));
         break;
 
         // needed because I'm getting a weird outOfBounds error
@@ -111,7 +122,7 @@ class Parser {
 
     w.endShape();
     w.setStroke(color(0, 10));
-    lineParent.addChild(w);
+    //lineParent.addChild(w);
 
     // Position shape in center of the screen
     lineParent.translate(width/2 - halfX, height/2 - halfY);
