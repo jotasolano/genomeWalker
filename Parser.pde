@@ -10,8 +10,9 @@ class Parser {
   float x;
   float y;
   PFont font;
-  int fontSize = 26;
+  int fontSize = 18;
   int a = 5;
+  float stepper = 3;
 
   float[] positions;
 
@@ -26,8 +27,10 @@ class Parser {
   // draw a "walker" by moving the x and y points based on the characters of the sequence
   PShape createWalker(float step, String nucleotides) {
     char[] nucleotidesChar = nucleotides.toCharArray();
-    float mapA, mapC, mapG, mapT, mapStroke, minX, maxX, minY, maxY, halfX, halfY;
+    float mapStroke, minX, maxX, minY, maxY, halfX, halfY;
     ArrayList<PShape> lines = new ArrayList<PShape>(nucleotides.length());
+    PShape startMarker = createShape();
+    float colors[] = {170, 280, 338, 205};
 
     // initialize vars
     minX = width;
@@ -38,27 +41,32 @@ class Parser {
     halfY = 0;
     x = 0;
     y = 0;
-    
-    float colors[] = {170, 280, 338, 205};
 
     colorMode(HSB, 360, 100, 100, 100);
-    //blendMode(ADD);
 
-    // Create the shape group
+    // Create the shape parent group
     lineParent = createShape(GROUP);
+
+    // Create a cross to mark the start of the walker
+    startMarker.beginShape(LINES);
+    startMarker.strokeWeight(1);
+    startMarker.vertex(x, y - 10);
+    startMarker.vertex(x, y + 10);
+    startMarker.vertex(x - 10, y);
+    startMarker.vertex(x + 10, y);
+    startMarker.endShape();
+    startMarker.setStroke(color(255, 255));
+    lineParent.addChild(startMarker);
 
     // Create the walker shape
     w = createShape();
     w.beginShape();
     w.strokeWeight(0.5);
     w.noFill();
-    strokeWeight(30);
+
+    // Draw the "cloud" walker shape
     for (int i = 0; i < nucleotides.length(); i++) {
-      mapA = map(i, 0, nucleotides.length(), 170, 283);
-      mapC = map(i, 0, nucleotides.length(), 0, 2*(360/4));
-      mapG = map(i, 0, nucleotides.length(), 0, 3*(360/4));
-      mapT = map(i, 0, nucleotides.length(), 0, 360);
-      
+
       if (i < nucleotides.length()/2) {
         mapStroke = map(i, 0, nucleotides.length()/2, 3, 30);
       } else {
@@ -70,19 +78,19 @@ class Parser {
       switch(nucleotidesChar[i]) {
       case 'A':
         x += step; // right
-        lines.add( createShape(LINE, x, y, x-3, y-3) );
+        lines.add( createShape(LINE, x, y, x-stepper, y-stepper) );
         lines.get(i).setStroke(color(colors[0], 100, 100, a));
         break;
 
       case 'C':
         y -= step; // up
-        lines.add( createShape(LINE, x, y, x+3, y-3) );
+        lines.add( createShape(LINE, x, y, x+stepper, y-stepper) );
         lines.get(i).setStroke(color(colors[1], 100, 100, a));
         break;
 
       case 'G':
         y += step; // down
-        lines.add( createShape(LINE, x, y, x+3, y+3) );
+        lines.add( createShape(LINE, x, y, x+stepper, y+stepper) );
         lines.get(i).setStroke(color(colors[2], 100, 100, a));
         break;
 
@@ -94,13 +102,14 @@ class Parser {
 
         // needed because I'm getting a weird outOfBounds error
         // probably a more elegant way to do this
-        // i imagine there are some weird characters that make the index skip
+        // i imagine there are some weird characters that make the switch skip
+        // (e.g. sometimes there are "ambiguous characters" like Y, M, etc)
       default: 
         lines.add( createShape(LINE, x, y, x, y) );
-        lines.get(i).setStroke(color(#FFCC00, 0));
+        lines.get(i).setStroke(color(0, 0));
       }
 
-      // Calculate bounding box
+      // Calculate bounding box values
       if (x < minX) {
         minX = x;
       } else if (y < minY) {
@@ -111,18 +120,17 @@ class Parser {
         maxY = y;
       }
 
-      halfX = (abs(maxX) - abs(minX)) / 2;
-      halfY = (abs(maxY) - abs(minY)) / 2;
-
-      // Create vertices for the line walker 
+      // Create vertices for the walker and line walker 
       w.vertex(x, y);
-
       lineParent.addChild(lines.get(i));
     } // loop nucleotides
 
+    halfX = (abs(maxX) - abs(minX)) / 2;
+    halfY = (abs(maxY) - abs(minY)) / 2;
+
     w.endShape();
     w.setStroke(color(0, 10));
-    //lineParent.addChild(w);
+    //lineParent.addChild(w); //if you want to see the actual walker
 
     // Position shape in center of the screen
     lineParent.translate(width/2 - halfX, height/2 - halfY);
@@ -132,12 +140,12 @@ class Parser {
 
 
   void renderTitle(String seqName) {
-    font = createFont("PlayfairDisplay-Regular.ttf", fontSize);
+    font = createFont("PT_Serif-Web-Regular.ttf", fontSize);
     pushStyle();
-    fill(50);
+    fill(255, 255);
     textFont(font);
-    textAlign(CENTER);
-    text(seqName, width/2, 45);
+    textAlign(LEFT);
+    text(seqName, 60, height - 60);
     popStyle();
   }
 }
