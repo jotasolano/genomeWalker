@@ -100,10 +100,8 @@ class Parser {
         lines.get(i).setStroke(color(colors[3], 100, 100, a));
         break;
 
-        // needed because I'm getting a weird outOfBounds error
-        // probably a more elegant way to do this
-        // i imagine there are some weird characters that make the switch skip
-        // (e.g. sometimes there are "ambiguous characters" like Y, M, etc)
+        // needed because of corner cases when the program reads "ambiguous characters"
+        // like Y, M, etc. "Y" for instance represents either A or C, hence the term ambiguous
       default: 
         lines.add( createShape(LINE, x, y, x, y) );
         lines.get(i).setStroke(color(0, 0));
@@ -140,7 +138,8 @@ class Parser {
 
 
   void renderTitle(String seqName) {
-    font = createFont("PT_Serif-Web-Regular.ttf", fontSize);
+    //font = createFont("PT_Serif-Web-Regular.ttf", fontSize);
+    font = createFont("Lato-Bold.ttf", fontSize);
     pushStyle();
     fill(255, 255);
     textFont(font);
